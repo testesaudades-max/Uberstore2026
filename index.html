@@ -1,32 +1,91 @@
-<select id="destino">
-    <option value="">Selecione uma opção...</option>
-    <option value="Vargem Alegre - R$ 10,00">Vargem Alegre - R$ 10,00</option>
-    <option value="Dorandia - R$ 20,00">Dorandia - R$ 20,00</option>
-    <option value="Pinheiral - R$ 40,00">Pinheiral - R$ 40,00</option>
-    <option value="Barra do Piraí - R$ 50,00">Barra do Piraí - R$ 50,00</option>
-</select>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Corrida</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        #btnConfirmar {
+            width: 100%;
+            padding: 15px;
+            background: #25d366;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        #btnConfirmar:hover { background: #1ebe57; }
+    </style>
+</head>
+<body>
 
-<button onclick="enviarParaWhatsApp()">Confirmar Corrida</button>
+<div class="container">
+    <h2>Solicitar Corrida</h2>
+    
+    <div class="input-group">
+        <label>📍 Escolha o destino:</label>
+        <select id="destino">
+            <option value="" disabled selected>Selecione uma opção...</option>
+            <option value="Vargem Alegre - R$ 10,00">Vargem Alegre - R$ 10,00</option>
+            <option value="Dorandia - R$ 20,00">Dorandia - R$ 20,00</option>
+            <option value="Pinheiral - R$ 40,00">Pinheiral - R$ 40,00</option>
+            <option value="Barra do Piraí - R$ 50,00">Barra do Piraí - R$ 50,00</option>
+        </select>
+    </div>
+
+    <button id="btnConfirmar" onclick="enviarWhatsApp()">Confirmar Corrida</button>
+</div>
 
 <script>
-    function enviarParaWhatsApp() {
-        const select = document.getElementById('destino');
-        const destinoSelecionado = select.value;
-
-        if (destinoSelecionado === "") {
-            alert("Por favor, selecione um destino!");
+    function enviarWhatsApp() {
+        const destinoSelecionado = document.getElementById('destino').value;
+        const numero = "5524999350830"; 
+        
+        // Verifica se algo foi selecionado
+        if(!destinoSelecionado) {
+            alert("⚠️ Por favor, selecione um destino antes de confirmar!");
             return;
         }
 
-        // --- CONFIGURAÇÃO ---
-        const seuNumeroWhatsApp = "5524999350830"; // Coloque o seu número com DDD aqui
-        const mensagem = "Olá! Gostaria de solicitar uma corrida para: " + destinoSelecionado;
-        // --------------------
-
-        // Cria a URL com a mensagem codificada
-        const url = `https://wa.me/${seuNumeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
-
-        // Abre o WhatsApp
-        window.open(url, '_blank');
+        const mensagem = `Olá! Gostaria de solicitar uma corrida para: *${destinoSelecionado}*`;
+        
+        // Cria o link e abre em uma nova aba
+        const link = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+        window.open(link, '_blank');
     }
 </script>
+
+</body>
+</html>
