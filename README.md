@@ -1,5 +1,3 @@
-Arquivo de  teste 
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -23,7 +21,17 @@ Arquivo de  teste
         .input-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        #mapa-container { width: 100%; height: 100px; background: #eee; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-around; align-items: center; border: 2px dashed #6e8efb; }
+        
+        #mapa-container { width: 100%; height: 100px; background: #eee; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-around; align-items: center; border: 2px dashed #6e8efb; transition: all 0.3s; }
+        
+        /* Animação de pulsar azul */
+        .piscando { border: 3px solid #007bff !important; background-color: #e7f1ff !important; animation: pulsar 1.5s infinite; }
+        @keyframes pulsar {
+            0% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 123, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
+        }
+
         .ponto { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 8px; text-align: center; font-weight: bold; }
         #btnConfirmar { width: 100%; padding: 15px; background: #25d366; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
@@ -49,6 +57,10 @@ Arquivo de  teste
             <label>👤 Seu Nome:</label>
             <input type="text" id="nomeCliente" placeholder="Digite seu nome">
         </div>
+        <div class="input-group">
+            <label>📍 Sua Localização (Endereço):</label>
+            <input type="text" id="localizacaoCliente" placeholder="Digite onde você está">
+        </div>
         <div id="mapa-container">
             <div class="ponto" style="background: #ff5733;" onclick="selecionar('Vargem Alegre - R$ 10,00')">Vargem</div>
             <div class="ponto" style="background: #33ff57;" onclick="selecionar('Dorandia - R$ 20,00')">Dorandia</div>
@@ -57,7 +69,7 @@ Arquivo de  teste
         </div>
         
         <div class="input-group">
-            <label>📍 Destino (ou digite abaixo):</label>
+            <label>🏁 Destino:</label>
             <select id="destino" onchange="limparManual()">
                 <option value="" disabled selected>Selecione um destino...</option>
                 <option value="Vargem Alegre - R$ 10,00">Vargem Alegre - R$ 10,00</option>
@@ -73,7 +85,6 @@ Arquivo de  teste
     </div>
 </div>
 
-<!-- ABAS RELATÓRIO (MANTIDAS IGUAIS) -->
 <div id="corrida" class="tab-content">
     <h2>Relatório de Corrida</h2>
     <table id="tabelaCorrida">
@@ -96,7 +107,7 @@ Arquivo de  teste
 
     function selecionar(valor) { 
         document.getElementById('destino').value = valor; 
-        document.getElementById('destinoManual').value = ""; // Limpa o manual ao clicar nos pontos
+        document.getElementById('destinoManual').value = "";
     }
 
     function limparManual() { document.getElementById('destinoManual').value = ""; }
@@ -104,18 +115,20 @@ Arquivo de  teste
 
     function processarCorrida() {
         const nome = document.getElementById('nomeCliente').value;
+        const local = document.getElementById('localizacaoCliente').value;
         const destinoSelecionado = document.getElementById('destino').value;
         const destinoManual = document.getElementById('destinoManual').value;
         
-        // Determina qual destino usar
         let destinoFinal = destinoSelecionado || destinoManual;
         
-        if(!nome || !destinoFinal) {
-            alert("⚠️ Preencha nome e destino!");
+        if(!nome || !local || !destinoFinal) {
+            alert("⚠️ Preencha nome, localização e destino!");
             return;
         }
 
-        // Tenta separar valor se houver o formato " - R$"
+        const mapa = document.getElementById('mapa-container');
+        mapa.classList.add('piscando');
+
         let destinoTexto = destinoFinal;
         let valorTexto = "A combinar";
         if(destinoFinal.includes(' - ')) {
@@ -124,23 +137,23 @@ Arquivo de  teste
             valorTexto = partes[1];
         }
         
-        // Atualiza tabelas
         document.getElementById('tabelaCorrida').innerHTML += `<tr><td>${nome}</td><td>${destinoTexto}</td><td>${valorTexto}</td></tr>`;
         document.getElementById('tabelaNavegacao').innerHTML += `<tr><td>${new Date().toLocaleTimeString()}</td><td>${destinoTexto}</td></tr>`;
 
-        // Monta mensagem
         const numeroMotorista = "5524999350830";
-        const linkRota = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destinoTexto)}`;
+        const linkRota = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(local)}&destination=${encodeURIComponent(destinoTexto)}`;
         
-        const mensagemRelatorio = `*--- NOVA SOLICITAÇÃO ---*
+        const mensagemRelatorio = `*--- STATUS DA CORRIDA ---*
 👤 *Cliente:* ${nome}
-📍 *Destino:* ${destinoTexto}
+📍 *Local de Partida:* ${local}
+🏁 *Destino:* ${destinoTexto}
 💰 *Valor:* ${valorTexto}
-✅ *Status:* Confirmado
-🔗 *Rota:* ${linkRota}`;
+✅ *Status:* O motorista aceitou a corrida e já está a caminho!
+🔗 *Acompanhe a rota em tempo real:* ${linkRota}`;
         
         window.open(`https://wa.me/${numeroMotorista}?text=${encodeURIComponent(mensagemRelatorio)}`, '_blank');
-        alert("Solicitação enviada!");
+        
+        alert("Corrida confirmada! O mapa está piscando indicando que o motorista está a caminho.");
     }
 </script>
 
