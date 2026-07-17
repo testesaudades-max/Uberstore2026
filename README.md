@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -53,19 +54,25 @@
             <div class="ponto" style="background: #3357ff;" onclick="selecionar('Pinheiral - R$ 40,00')">Pinheiral</div>
             <div class="ponto" style="background: #ff33a8;" onclick="selecionar('Barra do Piraí - R$ 50,00')">Barra</div>
         </div>
-        <select id="destino">
-            <option value="" disabled selected>Selecione um destino...</option>
-            <option value="Vargem Alegre - R$ 10,00">Vargem Alegre - R$ 10,00</option>
-            <option value="Dorandia - R$ 20,00">Dorandia - R$ 20,00</option>
-            <option value="Pinheiral - R$ 40,00">Pinheiral - R$ 40,00</option>
-            <option value="Barra do Piraí - R$ 50,00">Barra do Piraí - R$ 50,00</option>
-        </select>
-        <br><br>
+        
+        <div class="input-group">
+            <label>📍 Destino (ou digite abaixo):</label>
+            <select id="destino" onchange="limparManual()">
+                <option value="" disabled selected>Selecione um destino...</option>
+                <option value="Vargem Alegre - R$ 10,00">Vargem Alegre - R$ 10,00</option>
+                <option value="Dorandia - R$ 20,00">Dorandia - R$ 20,00</option>
+                <option value="Pinheiral - R$ 40,00">Pinheiral - R$ 40,00</option>
+                <option value="Barra do Piraí - R$ 50,00">Barra do Piraí - R$ 50,00</option>
+            </select>
+            <input type="text" id="destinoManual" placeholder="Ou digite o destino aqui..." style="margin-top: 10px;" oninput="limparSelect()">
+        </div>
+        
+        <br>
         <button id="btnConfirmar" onclick="processarCorrida()">Confirmar e Enviar</button>
     </div>
 </div>
 
-<!-- ABA RELATÓRIO DE CORRIDA -->
+<!-- ABAS RELATÓRIO (MANTIDAS IGUAIS) -->
 <div id="corrida" class="tab-content">
     <h2>Relatório de Corrida</h2>
     <table id="tabelaCorrida">
@@ -73,7 +80,6 @@
     </table>
 </div>
 
-<!-- ABA RELATÓRIO DE NAVEGAÇÃO -->
 <div id="navegacao" class="tab-content">
     <h2>Relatório de Navegação</h2>
     <table id="tabelaNavegacao">
@@ -87,40 +93,53 @@
         document.getElementById(tabId).style.display = 'block';
     }
 
-    function selecionar(valor) { document.getElementById('destino').value = valor; }
+    function selecionar(valor) { 
+        document.getElementById('destino').value = valor; 
+        document.getElementById('destinoManual').value = ""; // Limpa o manual ao clicar nos pontos
+    }
+
+    function limparManual() { document.getElementById('destinoManual').value = ""; }
+    function limparSelect() { document.getElementById('destino').value = ""; }
 
     function processarCorrida() {
         const nome = document.getElementById('nomeCliente').value;
-        const destinoCompleto = document.getElementById('destino').value;
+        const destinoSelecionado = document.getElementById('destino').value;
+        const destinoManual = document.getElementById('destinoManual').value;
         
-        if(!nome || !destinoCompleto) {
+        // Determina qual destino usar
+        let destinoFinal = destinoSelecionado || destinoManual;
+        
+        if(!nome || !destinoFinal) {
             alert("⚠️ Preencha nome e destino!");
             return;
         }
 
-        const partes = destinoCompleto.split(' - ');
-        const destino = partes[0];
-        const valor = partes[1];
+        // Tenta separar valor se houver o formato " - R$"
+        let destinoTexto = destinoFinal;
+        let valorTexto = "A combinar";
+        if(destinoFinal.includes(' - ')) {
+            const partes = destinoFinal.split(' - ');
+            destinoTexto = partes[0];
+            valorTexto = partes[1];
+        }
         
         // Atualiza tabelas
-        document.getElementById('tabelaCorrida').innerHTML += `<tr><td>${nome}</td><td>${destino}</td><td>${valor}</td></tr>`;
-        document.getElementById('tabelaNavegacao').innerHTML += `<tr><td>${new Date().toLocaleTimeString()}</td><td>${destino}</td></tr>`;
+        document.getElementById('tabelaCorrida').innerHTML += `<tr><td>${nome}</td><td>${destinoTexto}</td><td>${valorTexto}</td></tr>`;
+        document.getElementById('tabelaNavegacao').innerHTML += `<tr><td>${new Date().toLocaleTimeString()}</td><td>${destinoTexto}</td></tr>`;
 
-        // Monta mensagem para WhatsApp
+        // Monta mensagem
         const numeroMotorista = "5524999350830";
-        const linkRota = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino)}`;
+        const linkRota = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destinoTexto)}`;
         
         const mensagemRelatorio = `*--- NOVA SOLICITAÇÃO ---*
 👤 *Cliente:* ${nome}
-📍 *Destino:* ${destino}
-💰 *Taxímetro (Valor):* ${valor}
+📍 *Destino:* ${destinoTexto}
+💰 *Valor:* ${valorTexto}
 ✅ *Status:* Confirmado
 🔗 *Rota:* ${linkRota}`;
         
-        // Abre o WhatsApp
         window.open(`https://wa.me/${numeroMotorista}?text=${encodeURIComponent(mensagemRelatorio)}`, '_blank');
-        
-        alert("Solicitação enviada com sucesso!");
+        alert("Solicitação enviada!");
     }
 </script>
 
