@@ -151,9 +151,8 @@
 ✅ *Status:* O motorista aceitou a corrida e já está a caminho!
 🔗 *Acompanhe a rota em tempo real:* ${linkRota}`;
         
-        window.open(`https://wa.me/${numeroMotorista}?text=${encodeURIComponent(mensagemRelatorio)}`, '_blank');
-        
-        alert("Corrida confirmada! O mapa está piscando indicando que o motorista está a caminho.");
+        // Redireciona diretamente na mesma aba corrigindo o bloqueio de pop-up
+        window.location.href = `https://wa.me/${numeroMotorista}?text=${encodeURIComponent(mensagemRelatorio)}`;
     }
 </script>
 
